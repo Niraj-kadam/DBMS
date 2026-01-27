@@ -1,0 +1,138 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+.navbar-brand{
+    font-size: 30px;
+    margin-left: 30px;
+}
+
+.collapse{
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 30px;
+    font-size: large;
+}
+
+.hero {
+    width: 100%;
+    height: 400px;
+    background-image: url("../img/hero.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-top: 1px;
+     box-shadow: inset 20px 20px 30px #a3b1c6,
+                inset -20px -20px 30px #a3b1c6;
+}
+
+.cards {
+    width: 100%;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    width: 260px;
+    height: 140px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 20px 20px 30px #a3b1c6;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-card h3 {
+    margin: 0;
+    font-size: 18px;
+    color: black;
+}
+
+.dashboard-card .count {
+    font-size: 40px;
+    font-weight: bold;
+    color: black;
+    margin-top: 15px;
+}
+
+
+.footer {
+    background-color: #1f2933;
+    color: #d1d5db;
+    padding: 40px 0 0 0;
+    margin-top: 60px;
+    font-family: Arial, sans-serif;
+}
+
+.footer-container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 30px;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.footer-section p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    font-size: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.footer-section ul li:hover {
+    color: #1abc9c;
+}
+
+.social-icons span {
+    font-size: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.social-icons span:hover {
+    color: #1abc9c;
+}
+
+.footer-bottom {
+    border-top: 1px solid #374151;
+    text-align: center;
+    padding: 15px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.part1{
+    margin-left: 10px;
+}
