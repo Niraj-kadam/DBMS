@@ -16,7 +16,7 @@ function Home() {
                 <a className="nav-link" href="#">Home</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#">Login</a>
+                <a className="nav-link" href="choice">Login</a>
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="#">About</a>
@@ -26,8 +26,8 @@ function Home() {
         </div>
       </nav>
 
-      <div class="container-fluid p-0">
-        <div class="hero"></div>
+      <div className="container-fluid p-0">
+        <div className="hero"></div>
       </div>
 
       <div className="cards">

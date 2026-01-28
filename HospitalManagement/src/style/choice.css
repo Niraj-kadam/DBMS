@@ -1,0 +1,46 @@
+.choice-container{
+    margin: 0;
+    padding: 0;
+    background-color: #e0e5ec;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.choice-container .container-fluid{
+    margin-top: 0;
+    height: 400px;
+    width: 300px;
+    background-color: #f4f6f8;  
+    box-shadow:  20px 20px 30px #a3b1c6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.choice-container h2{
+    margin-top: 25px;
+}
+
+.role-cards{
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.heading{
+    width: 300px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px 10px 0px 0px;
+}
+
+.role-cards .btn{
+    width: 100px;
+    font-weight: bold;
+}
