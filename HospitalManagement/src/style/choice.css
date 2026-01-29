@@ -43,4 +43,14 @@
 .role-cards .btn{
     width: 100px;
     font-weight: bold;
+    text-decoration: none;
+}
+
+.role-cards .btn a{
+    text-decoration: none;
+    color: green;
+}
+
+.role-cards .btn:hover a{
+    color: white;
 }
