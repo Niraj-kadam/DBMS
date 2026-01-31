@@ -1,12 +1,12 @@
 import '../style/adminlog.css'
 
-function Adminlog() {
-    return (
+function Doctorlog(){
+    return(
         <>
             <div className="adminlog-container">
                 <div className="container-fluid">
                     <div className="adminlog-user bg-primary">
-                        <h2>Admin Login</h2>
+                        <h2>Doctor Login</h2>
                     </div>
                     <form action="">
                         <input type="text" placeholder='Email' />
@@ -14,7 +14,7 @@ function Adminlog() {
                         <button className="btn btn-outline-success"><a href="">Login</a></button>
                         <hr />
                         <div className="end">
-                            <p>New Admin?</p>
+                            <p>New Doctor?</p>
                             <span><a href="">Register Here</a></span>
                         </div>
                     </form>
@@ -24,4 +24,4 @@ function Adminlog() {
     )
 }
 
-export default Adminlog;
+export default Doctorlog;

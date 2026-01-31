@@ -10,8 +10,8 @@ function Choice(){
                     </div>
                     <div className="role-cards">
                         <button type="button" class="btn btn-outline-success"><a href="adminlog">Admin</a></button>
-                        <button type="button" class="btn btn-outline-success"><a href="">Staff</a></button>
-                        <button type="button" class="btn btn-outline-success"><a href="">Doctor</a></button>
+                        <button type="button" class="btn btn-outline-success"><a href="stafflog">Staff</a></button>
+                        <button type="button" class="btn btn-outline-success"><a href="doctorlog">Doctor</a></button>
                     </div>
                 </div>
             </div>
