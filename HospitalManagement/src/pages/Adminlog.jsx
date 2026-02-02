@@ -15,7 +15,7 @@ function Adminlog() {
                         <hr />
                         <div className="end">
                             <p>New Admin?</p>
-                            <span><a href="">Register Here</a></span>
+                            <span><a href="register">Register Here</a></span>
                         </div>
                     </form>
                 </div>

@@ -25,7 +25,7 @@
 }
 
 .adminlog-user {
-  width: 300px;
+  width: 300px; 
   height: 100px;
   display: flex;
   justify-content: center;
@@ -55,6 +55,7 @@ form input {
 }
 
 form .btn{
+    font-weight: bold;
     width: 100px;
     border-radius: 10px;
 }
@@ -76,6 +77,7 @@ hr{
 
 .end{
     display: flex;
+    font-weight: 500;
     gap: 5px;
 }
 

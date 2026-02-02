@@ -15,7 +15,7 @@ function Doctorlog(){
                         <hr />
                         <div className="end">
                             <p>New Doctor?</p>
-                            <span><a href="">Register Here</a></span>
+                            <span><a href="register">Register Here</a></span>
                         </div>
                     </form>
                 </div>

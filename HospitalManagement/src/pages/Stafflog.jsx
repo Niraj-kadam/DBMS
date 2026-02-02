@@ -15,7 +15,7 @@ function Stafflog(){
                         <hr />
                         <div className="end">
                             <p>New Staff?</p>
-                            <span><a href="">Register Here</a></span>
+                            <span><a href="register">Register Here</a></span>
                         </div>
                     </form>
                 </div>
