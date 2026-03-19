@@ -100,3 +100,39 @@ app.post("/login", (req, res) => {
 
 
 
+// Admin Page 
+/// * doctor part 
+
+app.post("/add-doctor", (req, res) => {
+  const { id, name, specialization, dept, phone, email, status } = req.body;
+
+  db.query(
+    "INSERT INTO doctors ( id, name, specialization, dept, phone, email, status ) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [ id, name, specialization, dept, phone, email, status ],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(400).json({
+          success: false,
+          message: err.sqlMessage || "DOctor Entry Failed"
+        });
+      } else {
+        res.send({ success: true, message: "Doctor Added Successfully" });
+      }
+    }
+  );
+});
+
+app.get("/doctors", (req, res) => {
+  db.query("SELECT * FROM doctors", (err, result) => {
+    if (err) return res.send(err);
+    res.send(result);
+  });
+});
+
+app.delete("/delete-doctor/:id", (req, res) => {
+  db.query("DELETE FROM doctors WHERE id = ?", [req.params.id], (err) => {
+    if (err) return res.send(err);
+    res.send({ message: "Deleted" });
+  });
+});

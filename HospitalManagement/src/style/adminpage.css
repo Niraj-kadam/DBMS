@@ -90,3 +90,105 @@
     transform: translateY(-3px);
     box-shadow: 0 8px 18px rgba(0,0,0,0.35);
 }
+
+/* DARK BACKGROUND */
+.doctor-container {
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+}
+
+/* HEADER */
+.doctor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.doctor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* SEARCH */
+.doctor-search {
+  background: #1e293b;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: white;
+}
+
+/* ADD BUTTON */
+.add-btn {
+  background: #38bdf8;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #0ea5e9;
+}
+
+/* TABLE CARD */
+.doctor-table {
+  background: #111827;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+/* TABLE */
+.doctor-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doctor-table th {
+  text-align: left;
+  padding: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.doctor-table td {
+  padding: 12px 10px;
+  border-top: 1px solid #1e293b;
+}
+
+/* STATUS */
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status.active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.status.leave {
+  background: rgba(234, 179, 8, 0.2);
+  color: #facc15;
+}
+
+/* DELETE BUTTON */
+.delete-btn {
+  background: #ef4444;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
