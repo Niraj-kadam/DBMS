@@ -57,10 +57,6 @@ app.get("/users", (req, res) => {
   });
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
-
 // Admin
 
 app.post("/login", (req, res) => {
@@ -153,7 +149,7 @@ app.put("/update-doctor/:id", (req, res) => {
   );
 });
 
-/// * patient part
+/// ------PATIENTS PART-------
 // GET ALL PATIENTS
 // AFTER — format admission date as plain YYYY-MM-DD string
 app.get("/patients", (req, res) => {
@@ -218,4 +214,76 @@ app.delete("/delete-patient/:id", (req, res) => {
     if (err) return res.status(500).json(err);
     res.json("Patient deleted");
   });
+});
+
+// -------STAFF PART-------
+
+app.get("/staff", (req, res) => {
+    const sql = "SELECT * FROM staff";
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json(err);
+        }
+        res.json(result);
+    });
+});
+
+app.post("/add-staff", (req, res) => {
+    const { id, name, role, phone, shift, status } = req.body;
+
+    const sql = `
+        INSERT INTO staff (id, name, role, phone, shift, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [id, name, role, phone, shift, status],
+        (err, result) => {
+            if (err) {
+                console.log("Add Staff Error:", err);
+                return res.status(500).json(err);
+            }
+            res.json("Staff added successfully");
+        }
+    );
+});
+
+app.put("/update-staff/:id", (req, res) => {
+    const id = req.params.id;
+    const { name, role, phone, shift, status } = req.body;
+
+    const sql = `
+        UPDATE staff 
+        SET name=?, role=?, phone=?, shift=?, status=?
+        WHERE id=?
+    `;
+
+    db.query(sql, [name, role, phone, shift, status, id],
+        (err, result) => {
+            if (err) {
+                console.log("Update Staff Error:", err);
+                return res.status(500).json(err);
+            }
+            res.json("Staff updated successfully");
+        }
+    );
+});
+
+app.delete("/delete-staff/:id", (req, res) => {
+    const id = req.params.id;
+
+    const sql = "DELETE FROM staff WHERE id=?";
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.log("Delete Staff Error:", err);
+            return res.status(500).json(err);
+        }
+        res.json("Staff deleted successfully");
+    });
+});
+// ── Start Server ──
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
 });

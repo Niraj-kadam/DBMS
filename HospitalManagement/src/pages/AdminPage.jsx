@@ -23,6 +23,16 @@ const defaultPatientForm = {
     status: "Admitted"
 };
 
+const defaultStaffForm = {
+    id: "",
+    name: "",
+    role: "Nurse",
+    phone: "",
+    shift: "Morning",
+    status: "Active"
+};
+
+
 function AdminPage() {
     const [activePage, setActivePage] = useState("dashboard");
 
@@ -42,7 +52,13 @@ function AdminPage() {
     const [editingPatientId, setEditingPatientId] = useState(null);
     const [patientForm, setPatientForm] = useState(defaultPatientForm);
 
-    const [staff] = useState([]);
+    // STAFF STATES
+    const [staff, setStaff] = useState([]);
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [isStaffEditing, setIsStaffEditing] = useState(false);
+    const [editingStaffId, setEditingStaffId] = useState(null);
+    const [staffForm, setStaffForm] = useState(defaultStaffForm);
+
     const [appointments] = useState([]);
 
     const handleChange = (e) => {
@@ -53,7 +69,9 @@ function AdminPage() {
     useEffect(() => {
         fetchDoctors();
         fetchPatients();   // ✅ ADD THIS
+        fetchStaff();
     }, []);
+
     const fetchDoctors = () => {
         axios.get("http://localhost:5000/doctors")
             .then((res) => setDoctors(res.data))
@@ -211,6 +229,74 @@ function AdminPage() {
         axios.delete(`http://localhost:5000/delete-patient/${id}`)
             .then(() => fetchPatients())
             .catch((err) => console.log(err));
+    };
+
+    // ----STAFF FUNCTIONS-------
+    const fetchStaff = () => {
+        axios.get("http://localhost:5000/staff")
+            .then(res => setStaff(res.data))
+            .catch(err => console.log(err));
+    };
+
+    const handleStaffChange = (e) => {
+        setStaffForm((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    // OPEN ADD
+    const addStaff = () => {
+        setStaffForm({ ...defaultStaffForm });
+        setIsStaffEditing(false);
+        setShowStaffModal(true);
+    };
+
+    // OPEN EDIT
+    const editStaff = (s) => {
+        setEditingStaffId(s.id);
+        setStaffForm({ ...s });
+        setIsStaffEditing(true);
+        setShowStaffModal(true);
+    };
+
+    // SAVE
+    const saveStaff = () => {
+        if (!staffForm.id || !staffForm.name) {
+            alert("ID and Name required");
+            return;
+        }
+
+        const payload = {
+            ...staffForm,
+            id: String(staffForm.id)
+        };
+
+        if (isStaffEditing) {
+            axios.put(`http://localhost:5000/update-staff/${editingStaffId}`, payload)
+                .then(() => {
+                    fetchStaff();
+                    setShowStaffModal(false);
+                    setIsStaffEditing(false);
+                })
+                .catch(err => console.log(err));
+        } else {
+            axios.post("http://localhost:5000/add-staff", payload)
+                .then(() => {
+                    fetchStaff();
+                    setShowStaffModal(false);
+                })
+                .catch(err => console.log(err));
+        }
+    };
+
+    // DELETE
+    const deleteStaff = (id) => {
+        if (!window.confirm("Delete this staff?")) return;
+
+        axios.delete(`http://localhost:5000/delete-staff/${id}`)
+            .then(() => fetchStaff())
+            .catch(err => console.log(err));
     };
 
     return (
@@ -597,6 +683,136 @@ function AdminPage() {
                                         <button className="cancel-btn" onClick={() => setShowPatientModal(false)}>Cancel</button>
                                         <button className="save-btn" onClick={savePatient}>
                                             {isPatientEditing ? "Update" : "Save"}
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
+
+                        {activePage === "staff" && (
+                            <div className="doctor-container">
+
+                                <div className="doctor-header">
+                                    <h4>👨‍💼 Manage Staff</h4>
+                                    <div className="doctor-actions">
+                                        <button className="add-btn" onClick={addStaff}>+ Add</button>
+                                    </div>
+                                </div>
+
+                                <div className="doctor-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NAME</th>
+                                                <th>ROLE</th>
+                                                <th>PHONE</th>
+                                                <th>SHIFT</th>
+                                                <th>STATUS</th>
+                                                <th>ACTION</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {staff.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="7" className="no-data">No staff found.</td>
+                                                </tr>
+                                            ) : (
+                                                staff.map((s) => (
+                                                    <tr key={s.id}>
+                                                        <td>{s.id}</td>
+                                                        <td>{s.name}</td>
+                                                        <td>{s.role}</td>
+                                                        <td>{s.phone}</td>
+                                                        <td>{s.shift}</td>
+                                                        <td>
+                                                            <span className={
+                                                                s.status === "Active" ? "status active" : "status inactive"
+                                                            }>
+                                                                {s.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="action-btns">
+                                                            <button className="edit-btn" onClick={() => editStaff(s)}>✏️ Edit</button>
+                                                            <button className="delete-btn" onClick={() => deleteStaff(s.id)}>🗑 Delete</button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {showStaffModal && (
+                            <div className="modal-overlay">
+                                <div className="modal-box">
+
+                                    <div className="modal-header">
+                                        <h4>{isStaffEditing ? "✏️ Edit Staff" : "➕ Add Staff"}</h4>
+                                        <button onClick={() => setShowStaffModal(false)}>✖</button>
+                                    </div>
+
+                                    <div className="modal-body">
+
+                                        <div className="form-group">
+                                            <label>ID</label>
+                                            <input
+                                                name="id"
+                                                value={staffForm.id}
+                                                onChange={handleStaffChange}
+                                                disabled={isStaffEditing}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Name</label>
+                                            <input name="name" value={staffForm.name} onChange={handleStaffChange} />
+                                        </div>
+
+                                        {/* ROLE DROPDOWN */}
+                                        <div className="form-group">
+                                            <label>Role</label>
+                                            <select name="role" value={staffForm.role} onChange={handleStaffChange}>
+                                                <option value="Nurse">Nurse</option>
+                                                <option value="Receptionist">Receptionist</option>
+                                                <option value="Lab Staff">Lab Staff</option>
+                                                <option value="Technician">Technician</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Phone</label>
+                                            <input name="phone" value={staffForm.phone} onChange={handleStaffChange} />
+                                        </div>
+
+                                        {/* SHIFT DROPDOWN */}
+                                        <div className="form-group">
+                                            <label>Shift</label>
+                                            <select name="shift" value={staffForm.shift} onChange={handleStaffChange}>
+                                                <option value="Morning">Morning</option>
+                                                <option value="Afternoon">Afternoon</option>
+                                                <option value="Night">Night</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group full-width">
+                                            <label>Status</label>
+                                            <select name="status" value={staffForm.status} onChange={handleStaffChange}>
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="modal-footer">
+                                        <button className="cancel-btn" onClick={() => setShowStaffModal(false)}>Cancel</button>
+                                        <button className="save-btn" onClick={saveStaff}>
+                                            {isStaffEditing ? "Update" : "Save"}
                                         </button>
                                     </div>
 
