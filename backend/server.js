@@ -283,6 +283,185 @@ app.delete("/delete-staff/:id", (req, res) => {
         res.json("Staff deleted successfully");
     });
 });
+
+
+// -------APPOINTMENTS PART-------
+
+// GET ALL APPOINTMENTS
+app.get("/appointments", (req, res) => {
+  db.query("SELECT * FROM appointments", (err, result) => {
+    if (err) return res.send(err);
+    res.send(result);
+  });
+});
+
+// ADD
+app.post("/add-appointment", (req, res) => {
+  const { id, patient, doctor, date, time, status } = req.body;
+
+  db.query(
+    "INSERT INTO appointments (id, patient, doctor, date, time, status) VALUES (?, ?, ?, ?, ?, ?)",
+    [id, patient, doctor, date, time, status],
+    (err, result) => {
+      if (err) return res.status(400).send(err);
+      res.send("Appointment added");
+    }
+  );
+});
+
+// UPDATE
+app.put("/update-appointment/:id", (req, res) => {
+  const { patient, doctor, date, time, status } = req.body;
+
+  db.query(
+    "UPDATE appointments SET patient=?, doctor=?, date=?, time=?, status=? WHERE id=?",
+    [patient, doctor, date, time, status, req.params.id],
+    (err, result) => {
+      if (err) return res.send(err);
+      res.send("Updated");
+    }
+  );
+});
+
+// DELETE
+app.delete("/delete-appointment/:id", (req, res) => {
+  db.query(
+    "DELETE FROM appointments WHERE id=?",
+    [req.params.id],
+    (err, result) => {
+      if (err) return res.send(err);
+      res.send("Deleted");
+    }
+  );
+});
+
+// STATUS UPDATE (IMPORTANT)
+app.put("/update-appointment-status/:id", (req, res) => {
+  const { status } = req.body;
+
+  db.query(
+    "UPDATE appointments SET status=? WHERE id=?",
+    [status, req.params.id],
+    (err, result) => {
+      if (err) return res.send(err);
+      res.send("Status updated");
+    }
+  );
+});
+// ── DEPARTMENTS PART ──
+
+// GET ALL DEPARTMENTS
+app.get("/departments", (req, res) => {
+  db.query("SELECT * FROM departments", (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
+// ADD DEPARTMENT
+app.post("/add-department", (req, res) => {
+  const { id, name, head, beds, occupied } = req.body;
+
+  if (!id || !name) {
+    return res.status(400).json({ error: "ID and Name are required" });
+  }
+
+  const sql = `
+    INSERT INTO departments (id, name, head, beds, occupied)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [Number(id), name, head || null, Number(beds) || 0, Number(occupied) || 0],
+    (err, result) => {
+      if (err) {
+        console.error("Add Department Error:", err.sqlMessage);
+        return res.status(500).json({ error: err.sqlMessage });
+      }
+      res.json({ success: true, message: "Department added successfully" });
+    }
+  );
+});
+
+// DELETE DEPARTMENT
+app.delete("/delete-department/:id", (req, res) => {
+  db.query("DELETE FROM departments WHERE id = ?", [Number(req.params.id)], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true, message: "Department deleted" });
+  });
+});
+
+// ── BILLING PART ──
+
+// GET ALL BILLS
+app.get("/billing", (req, res) => {
+  db.query("SELECT * FROM billing", (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
+// ADD BILL
+app.post("/add-bill", (req, res) => {
+  const { id, patient, treatment, amount, status } = req.body;
+
+  if (!id || !patient) {
+    return res.status(400).json({ error: "ID and Patient are required" });
+  }
+
+  const sql = `
+    INSERT INTO billing (id, patient, treatment, amount, status)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [id, patient, treatment, amount, status || "Pending"], (err, result) => {
+    if (err) {
+      console.error("Add Bill Error:", err.sqlMessage);
+      return res.status(500).json({ error: err.sqlMessage });
+    }
+    res.json({ success: true, message: "Bill added successfully" });
+  });
+});
+
+// UPDATE BILL
+app.put("/update-bill/:id", (req, res) => {
+  const { patient, treatment, amount, status } = req.body;
+
+  const sql = `
+    UPDATE billing 
+    SET patient=?, treatment=?, amount=?, status=?
+    WHERE id=?
+  `;
+
+  db.query(sql, [patient, treatment, amount, status, req.params.id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true, message: "Bill updated successfully" });
+  });
+});
+
+// DELETE BILL
+app.delete("/delete-bill/:id", (req, res) => {
+  db.query("DELETE FROM billing WHERE id=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true, message: "Bill deleted" });
+  });
+});
+
+// UPDATE BILL STATUS ONLY
+app.put("/update-bill-status/:id", (req, res) => {
+  const { status } = req.body;
+
+  db.query(
+    "UPDATE billing SET status=? WHERE id=?",
+    [status, req.params.id],
+    (err) => {
+      if (err) return res.status(500).json(err);
+      res.json({ success: true, message: "Status updated" });
+    }
+  );
+});
+
 // ── Start Server ──
 app.listen(5000, () => {
   console.log("Server running on port 5000");

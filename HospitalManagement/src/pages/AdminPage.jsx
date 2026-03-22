@@ -32,6 +32,30 @@ const defaultStaffForm = {
     status: "Active"
 };
 
+const defaultAppointmentForm = {
+    id: "",
+    patient: "",
+    doctor: "",
+    date: "",
+    time: "",
+    status: "Pending"
+};
+
+const defaultDepartmentForm = {
+    id: "",
+    name: "",
+    head: "",
+    beds: "",
+    occupied: ""
+};
+
+const defaultBillingForm = {
+    id: "",
+    patient: "",
+    treatment: "",
+    amount: "",
+    status: "Pending"
+};
 
 function AdminPage() {
     const [activePage, setActivePage] = useState("dashboard");
@@ -59,7 +83,24 @@ function AdminPage() {
     const [editingStaffId, setEditingStaffId] = useState(null);
     const [staffForm, setStaffForm] = useState(defaultStaffForm);
 
-    const [appointments] = useState([]);
+    // APPOINTMENT STATES
+    const [appointments, setAppointments] = useState([]);
+    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+    const [appointmentForm, setAppointmentForm] = useState(defaultAppointmentForm);
+    const [isAppointmentEditing, setIsAppointmentEditing] = useState(false);
+    const [editingAppointmentId, setEditingAppointmentId] = useState(null);
+
+    // DEPARTMENT STATES
+    const [departments, setDepartments] = useState([]);
+    const [showDeptModal, setShowDeptModal] = useState(false);
+    const [deptForm, setDeptForm] = useState(defaultDepartmentForm);
+
+    // BILLING STATES
+    const [bills, setBills] = useState([]);
+    const [showBillModal, setShowBillModal] = useState(false);
+    const [isBillEditing, setIsBillEditing] = useState(false);
+    const [editingBillId, setEditingBillId] = useState(null);
+    const [billForm, setBillForm] = useState(defaultBillingForm);
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -70,6 +111,9 @@ function AdminPage() {
         fetchDoctors();
         fetchPatients();   // ✅ ADD THIS
         fetchStaff();
+        fetchAppointments();
+        fetchDepartments();
+        fetchBilling();
     }, []);
 
     const fetchDoctors = () => {
@@ -299,6 +343,197 @@ function AdminPage() {
             .catch(err => console.log(err));
     };
 
+    // ── APPOINTMENT FUNCTIONS ──
+    const fetchAppointments = () => {
+        axios.get("http://localhost:5000/appointments")
+            .then(res => setAppointments(res.data))
+            .catch(err => console.log(err));
+    };
+
+    const handleAppointmentChange = (e) => {
+        setAppointmentForm(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const updateAppointmentStatus = (id, status) => {
+        axios.put(`http://localhost:5000/update-appointment-status/${id}`, { status })
+            .then(() => fetchAppointments())
+            .catch(err => console.log(err));
+    };
+
+    // OPEN ADD
+    const addAppointment = () => {
+        setAppointmentForm({ ...defaultAppointmentForm });
+        setIsAppointmentEditing(false);
+        setShowAppointmentModal(true);
+    };
+
+    // OPEN EDIT
+    const editAppointment = (a) => {
+        setEditingAppointmentId(a.id);
+        setAppointmentForm({
+            ...a,
+            date: a.date?.slice(0, 10)
+        });
+        setIsAppointmentEditing(true);
+        setShowAppointmentModal(true);
+    };
+
+    // SAVE
+    const saveAppointment = () => {
+        if (!appointmentForm.id || !appointmentForm.patient) {
+            alert("ID & Patient required");
+            return;
+        }
+
+        const payload = {
+            ...appointmentForm,
+            id: String(appointmentForm.id)
+        };
+
+        if (isAppointmentEditing) {
+            axios.put(`http://localhost:5000/update-appointment/${editingAppointmentId}`, payload)
+                .then(() => {
+                    fetchAppointments();
+                    setShowAppointmentModal(false);
+                    setIsAppointmentEditing(false);
+                })
+                .catch(err => console.log(err));
+        } else {
+            axios.post("http://localhost:5000/add-appointment", payload)
+                .then(() => {
+                    fetchAppointments();
+                    setShowAppointmentModal(false);
+                })
+                .catch(err => console.log(err));
+        }
+    };
+
+    // DELETE
+    const deleteAppointment = (id) => {
+        if (!window.confirm("Delete this appointment?")) return;
+
+        axios.delete(`http://localhost:5000/delete-appointment/${id}`)
+            .then(() => fetchAppointments())
+            .catch(err => console.log(err));
+    };
+
+    // ── DEPARTMENT FUNCTIONS ──
+    const fetchDepartments = () => {
+        axios.get("http://localhost:5000/departments")
+            .then(res => setDepartments(res.data))
+            .catch(err => console.log(err));
+    };
+
+    const handleDeptChange = (e) => {
+        setDeptForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const openAddDept = () => {
+        setDeptForm({ ...defaultDepartmentForm });
+        setShowDeptModal(true);
+    };
+
+    const saveDepartment = () => {
+        if (!deptForm.id || !deptForm.name) {
+            alert("ID and Name are required!");
+            return;
+        }
+        const payload = {
+            ...deptForm,
+            beds: Number(deptForm.beds) || 0,
+            occupied: Number(deptForm.occupied) || 0
+        };
+        axios.post("http://localhost:5000/add-department", payload)
+            .then(() => {
+                fetchDepartments();
+                setShowDeptModal(false);
+                setDeptForm({ ...defaultDepartmentForm });
+            })
+            .catch(err => {
+                console.log(err);
+                alert("Failed to add department. Check console.");
+            });
+    };
+
+    const deleteDepartment = (id) => {
+        if (!window.confirm("Remove this department?")) return;
+        axios.delete(`http://localhost:5000/delete-department/${id}`)
+            .then(() => fetchDepartments())
+            .catch(err => console.log(err));
+    };
+
+    // ── BILLING FUNCTIONS ──
+    const fetchBilling = () => {
+        axios.get("http://localhost:5000/billing")
+            .then(res => setBills(res.data))
+            .catch(err => console.log(err));
+    };
+
+    const handleBillChange = (e) => {
+        setBillForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const addBill = () => {
+        setBillForm({ ...defaultBillingForm });
+        setIsBillEditing(false);
+        setShowBillModal(true);
+    };
+
+    const editBill = (b) => {
+        setEditingBillId(b.id);
+        setBillForm({ ...b });
+        setIsBillEditing(true);
+        setShowBillModal(true);
+    };
+
+    const saveBill = () => {
+        if (!billForm.id || !billForm.patient) {
+            alert("ID and Patient are required!");
+            return;
+        }
+        const payload = {
+            ...billForm,
+            amount: Number(billForm.amount) || 0
+        };
+
+        if (isBillEditing) {
+            axios.put(`http://localhost:5000/update-bill/${editingBillId}`, payload)
+                .then(() => {
+                    fetchBilling();
+                    setShowBillModal(false);
+                    setIsBillEditing(false);
+                })
+                .catch(err => console.log(err));
+        } else {
+            axios.post("http://localhost:5000/add-bill", payload)
+                .then(() => {
+                    fetchBilling();
+                    setShowBillModal(false);
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Failed to add bill. Check console.");
+                });
+        }
+    };
+
+    const deleteBill = (id) => {
+        if (!window.confirm("Delete this bill?")) return;
+        axios.delete(`http://localhost:5000/delete-bill/${id}`)
+            .then(() => fetchBilling())
+            .catch(err => console.log(err));
+    };
+
+    const toggleBillStatus = (id, currentStatus) => {
+        const newStatus = currentStatus === "Paid" ? "Pending" : "Paid";
+        axios.put(`http://localhost:5000/update-bill-status/${id}`, { status: newStatus })
+            .then(() => fetchBilling())
+            .catch(err => console.log(err));
+    };
+
     return (
         <>
             <div className="container-fluid admin-dashboard">
@@ -318,7 +553,7 @@ function AdminPage() {
                             <a className="nav-link text-white" onClick={() => setActivePage("staff")}>👨‍💼 Staff</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("appointment")}>📅 Appointments</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("department")}>🏢 Departments</a>
-                            <a className="nav-link text-white" href="#">💳 Billing</a>
+                            <a className="nav-link text-white" onClick={() => setActivePage("billing")}>💳 Billing</a>
                             <a className="nav-link text-white" href="#">📈 Reports</a>
                             <a className="nav-link text-white" href="#">⚙️ Settings</a>
                         </nav>
@@ -341,6 +576,11 @@ function AdminPage() {
                                     <h3 className="m-0">
                                         {activePage === "dashboard" && "Dashboard"}
                                         {activePage === "doctor" && "Manage Doctors"}
+                                        {activePage === "patient" && "Manage Patients"}
+                                        {activePage === "staff" && "Manage Staff"}
+                                        {activePage === "appointment" && "Manage Appointments"}
+                                        {activePage === "department" && "Manage Departments"}
+                                        {activePage === "billing" && "Billing & Payments"}
                                     </h3>
                                     <small>Welcome back, Admin!</small>
                                 </div>
@@ -353,36 +593,97 @@ function AdminPage() {
                         </nav>
 
                         {/* ── DASHBOARD ── */}
-                        {activePage === "dashboard" && (
-                            <div className="container-fluid px-4 mt-4">
-                                <div className="row g-4">
-                                    <div className="col-md-3">
-                                        <div className="card text-center shadow-sm p-3">
-                                            <h5>Total Doctors</h5>
-                                            <h2>{doctors.length}</h2>
+                        {activePage === "dashboard" && (() => {
+                            const totalDepartments = departments.length;
+                            const totalBeds = departments.reduce((sum, d) => sum + (Number(d.beds) || 0), 0);
+                            const occupiedBeds = departments.reduce((sum, d) => sum + (Number(d.occupied) || 0), 0);
+                            const availableBeds = totalBeds - occupiedBeds;
+                            const totalBill = patients.reduce((sum, p) => sum + (Number(p.bill) || 0), 0);
+
+                            return (
+                                <div className="container-fluid px-4 mt-4">
+                                    {/* Row 1 */}
+                                    <div className="row g-4 mb-2">
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--blue">
+                                                <div className="dash-card__icon">👨‍⚕️</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Doctors</span>
+                                                    <span className="dash-card__value">{doctors.length}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--green">
+                                                <div className="dash-card__icon">🧑‍🦽</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Patients</span>
+                                                    <span className="dash-card__value">{patients.length}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--purple">
+                                                <div className="dash-card__icon">🧑‍💼</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Staff</span>
+                                                    <span className="dash-card__value">{staff.length}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--orange">
+                                                <div className="dash-card__icon">📅</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Appointments</span>
+                                                    <span className="dash-card__value">{appointments.length}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="col-md-3">
-                                        <div className="card text-center shadow-sm p-3">
-                                            <h5>Total Patients</h5>
-                                            <h2>{patients.length}</h2>
+
+                                    {/* Row 2 */}
+                                    <div className="row g-4">
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--teal">
+                                                <div className="dash-card__icon">🏥</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Departments</span>
+                                                    <span className="dash-card__value">{totalDepartments}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <div className="card text-center shadow-sm p-3">
-                                            <h5>Total Staff</h5>
-                                            <h2>{staff.length}</h2>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--red">
+                                                <div className="dash-card__icon">💰</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Total Bills</span>
+                                                    <span className="dash-card__value">₹{totalBill.toLocaleString("en-IN")}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <div className="card text-center shadow-sm p-3">
-                                            <h5>Total Appointments</h5>
-                                            <h2>{appointments.length}</h2>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--indigo">
+                                                <div className="dash-card__icon">🛏️</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Beds Occupied</span>
+                                                    <span className="dash-card__value">{occupiedBeds} <small>/ {totalBeds}</small></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="dash-card dash-card--cyan">
+                                                <div className="dash-card__icon">✅</div>
+                                                <div className="dash-card__info">
+                                                    <span className="dash-card__label">Beds Available</span>
+                                                    <span className="dash-card__value">{availableBeds}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* ── DOCTOR PAGE ── */}
                         {activePage === "doctor" && (
@@ -818,6 +1119,413 @@ function AdminPage() {
 
                                 </div>
                             </div>
+                        )}
+
+                        {activePage === "appointment" && (
+                            <div className="doctor-container">
+
+                                <div className="doctor-header">
+                                    <h4>📅 Manage Appointments</h4>
+                                    <div className="doctor-actions">
+                                        <button className="add-btn" onClick={addAppointment}>+ Add</button>
+                                    </div>
+                                </div>
+                                <div className="doctor-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>PATIENT</th>
+                                                <th>DOCTOR</th>
+                                                <th>DATE</th>
+                                                <th>TIME</th>
+                                                <th>STATUS</th>
+                                                <th>ACTION</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {appointments.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="7" className="no-data">No appointments found.</td>
+                                                </tr>
+                                            ) : (
+                                                appointments.map((a) => (
+                                                    <tr key={a.id}>
+                                                        <td>{a.id}</td>
+                                                        <td>{a.patient}</td>
+                                                        <td>{a.doctor}</td>
+                                                        <td>{a.date?.slice(0, 10)}</td>
+                                                        <td>{a.time}</td>
+
+                                                        <td>
+                                                            <span className={
+                                                                a.status === "Accepted" ? "status active" :
+                                                                    a.status === "Rejected" ? "status inactive" :
+                                                                        "status leave"
+                                                            }>
+                                                                {a.status}
+                                                            </span>
+                                                        </td>
+
+                                                        <td className="action-btns">
+
+                                                            <button className="edit-btn" onClick={() => editAppointment(a)}>
+                                                                ✏️ Edit
+                                                            </button>
+
+                                                            <button className="delete-btn" onClick={() => deleteAppointment(a.id)}>
+                                                                🗑 Delete
+                                                            </button>
+
+                                                            {/* ACCEPT */}
+                                                            {a.status !== "Accepted" && (
+                                                                <button className="accept-btn" onClick={() => updateAppointmentStatus(a.id, "Accepted")}>
+                                                                    ✅ Accept
+                                                                </button>
+                                                            )}
+
+                                                            {/* REJECT */}
+                                                            {a.status !== "Rejected" && (
+                                                                <button className="reject-btn" onClick={() => updateAppointmentStatus(a.id, "Rejected")}>
+                                                                    ❌ Reject
+                                                                </button>
+                                                            )}
+
+                                                            {/* REVERT */}
+                                                            {(a.status === "Accepted" || a.status === "Rejected") && (
+                                                                <button className="revert-btn" onClick={() => updateAppointmentStatus(a.id, "Pending")}>
+                                                                    🔄 Pending
+                                                                </button>
+                                                            )}
+
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── DEPARTMENTS PAGE ── */}
+                        {activePage === "department" && (
+                            <div className="dept-container">
+                                <div className="dept-header">
+                                    <h4>🏢 Manage Departments</h4>
+                                    <button className="add-dept-btn" onClick={openAddDept}>+ Add Department</button>
+                                </div>
+
+                                <div className="dept-grid">
+                                    {departments.length === 0 ? (
+                                        <p className="no-dept-msg">No departments found. Add one!</p>
+                                    ) : (
+                                        departments.map((dep, idx) => {
+                                            const pct = dep.beds > 0
+                                                ? Math.round((dep.occupied / dep.beds) * 100)
+                                                : 0;
+                                            return (
+                                                <div className="dept-card" key={dep.id}>
+                                                    <div className="dept-card__top">
+                                                        <span className="dept-card__name">{dep.name}</span>
+                                                        <span className="dept-card__id">{dep.id}</span>
+                                                    </div>
+                                                    <p className="dept-card__head">Head: {dep.head || "—"}</p>
+                                                    <div className="dept-card__beds">
+                                                        <span className="dept-beds-occupied">{dep.occupied}</span>
+                                                        <span className="dept-beds-total">/{dep.beds} beds</span>
+                                                    </div>
+                                                    <div className="dept-progress-track">
+                                                        <div
+                                                            className="dept-progress-fill"
+                                                            style={{ width: `${pct}%` }}
+                                                        />
+                                                    </div>
+                                                    <button className="dept-remove-btn" onClick={() => deleteDepartment(dep.id)}>
+                                                        🗑 Remove
+                                                    </button>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+
+                                {/* Add Department Modal */}
+                                {showDeptModal && (
+                                    <div className="modal-overlay">
+                                        <div className="modal-box">
+                                            <div className="modal-header">
+                                                <h4>➕ Add Department</h4>
+                                                <button onClick={() => setShowDeptModal(false)}>✖</button>
+                                            </div>
+                                            <div className="modal-body">
+                                                <div className="form-group">
+                                                    <label>Department ID</label>
+                                                    <input name="id" placeholder="e.g. DEP05" value={deptForm.id} onChange={handleDeptChange} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Department Name</label>
+                                                    <input name="name" placeholder="e.g. Radiology" value={deptForm.name} onChange={handleDeptChange} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Head Doctor</label>
+                                                    <input name="head" placeholder="e.g. Dr. John Smith" value={deptForm.head} onChange={handleDeptChange} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Total Beds</label>
+                                                    <input type="number" name="beds" placeholder="e.g. 20" value={deptForm.beds} onChange={handleDeptChange} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Occupied Beds</label>
+                                                    <input type="number" name="occupied" placeholder="e.g. 12" value={deptForm.occupied} onChange={handleDeptChange} />
+                                                </div>
+                                            </div>
+                                            <div className="modal-footer">
+                                                <button className="cancel-btn" onClick={() => setShowDeptModal(false)}>Cancel</button>
+                                                <button className="save-btn" onClick={saveDepartment}>Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── BILLING PAGE ── */}
+                        {activePage === "billing" && (() => {
+                            const totalRevenue = bills
+                                .filter(b => b.status === "Paid")
+                                .reduce((sum, b) => sum + Number(b.amount), 0);
+                            const pendingTotal = bills
+                                .filter(b => b.status === "Pending")
+                                .reduce((sum, b) => sum + Number(b.amount), 0);
+                            const totalBills = bills.length;
+
+                            return (
+                                <div className="billing-container">
+
+                                    {/* Summary Cards */}
+                                    <div className="billing-summary">
+                                        <div className="bill-summary-card bill-summary-card--green">
+                                            <span className="bill-summary-amount">₹{totalRevenue.toLocaleString("en-IN")}</span>
+                                            <span className="bill-summary-label">Total Revenue (Paid)</span>
+                                        </div>
+                                        <div className="bill-summary-card bill-summary-card--orange">
+                                            <span className="bill-summary-amount">₹{pendingTotal.toLocaleString("en-IN")}</span>
+                                            <span className="bill-summary-label">Pending Payments</span>
+                                        </div>
+                                        <div className="bill-summary-card bill-summary-card--neutral">
+                                            <span className="bill-summary-amount">{totalBills}</span>
+                                            <span className="bill-summary-label">Total Bills</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Table Section */}
+                                    <div className="billing-table-section">
+                                        <div className="billing-table-header">
+                                            <h5 className="billing-table-title">All Bills</h5>
+                                            <button className="generate-bill-btn" onClick={addBill}>+ Generate Bill</button>
+                                        </div>
+
+                                        <div className="billing-table-wrapper">
+                                            <table className="billing-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>BILL ID</th>
+                                                        <th>PATIENT</th>
+                                                        <th>TREATMENT</th>
+                                                        <th>AMOUNT (₹)</th>
+                                                        <th>STATUS</th>
+                                                        <th>ACTION</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {bills.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="6" className="no-data">No bills found. Generate one!</td>
+                                                        </tr>
+                                                    ) : (
+                                                        bills.map((bill) => (
+                                                            <tr key={bill.id}>
+                                                                <td className="bill-id">{bill.id}</td>
+                                                                <td className="bill-patient">{bill.patient}</td>
+                                                                <td className="bill-treatment">{bill.treatment}</td>
+                                                                <td className="bill-amount">₹{Number(bill.amount).toLocaleString("en-IN")}</td>
+                                                                <td>
+                                                                    <span className={`bill-status ${bill.status === "Paid" ? "bill-status--paid" : "bill-status--pending"}`}>
+                                                                        {bill.status}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="bill-actions">
+                                                                    <button
+                                                                        className={`bill-toggle-btn ${bill.status === "Paid" ? "bill-toggle-btn--mark-pending" : "bill-toggle-btn--mark-paid"}`}
+                                                                        onClick={() => toggleBillStatus(bill.id, bill.status)}
+                                                                    >
+                                                                        {bill.status === "Paid" ? "Mark Pending" : "Mark Paid"}
+                                                                    </button>
+                                                                    <button className="bill-edit-btn" onClick={() => editBill(bill)}>✏️</button>
+                                                                    <button className="bill-delete-btn" onClick={() => deleteBill(bill.id)}>🗑️</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* Generate/Edit Bill Modal */}
+                                    {showBillModal && (
+                                        <div className="modal-overlay">
+                                            <div className="modal-box">
+                                                <div className="modal-header">
+                                                    <h4>{isBillEditing ? "✏️ Edit Bill" : "🧾 Generate Bill"}</h4>
+                                                    <button onClick={() => setShowBillModal(false)}>✖</button>
+                                                </div>
+                                                <div className="modal-body">
+                                                    <div className="form-group">
+                                                        <label>Bill ID</label>
+                                                        <input
+                                                            name="id"
+                                                            placeholder="e.g. B001"
+                                                            value={billForm.id}
+                                                            onChange={handleBillChange}
+                                                            disabled={isBillEditing}
+                                                        />
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label>Patient Name</label>
+                                                        <input
+                                                            name="patient"
+                                                            placeholder="e.g. Amit Verma"
+                                                            value={billForm.patient}
+                                                            onChange={handleBillChange}
+                                                        />
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label>Treatment</label>
+                                                        <input
+                                                            name="treatment"
+                                                            placeholder="e.g. Cardiology Checkup"
+                                                            value={billForm.treatment}
+                                                            onChange={handleBillChange}
+                                                        />
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label>Amount (₹)</label>
+                                                        <input
+                                                            type="number"
+                                                            name="amount"
+                                                            placeholder="e.g. 4500"
+                                                            value={billForm.amount}
+                                                            onChange={handleBillChange}
+                                                        />
+                                                    </div>
+                                                    <div className="form-group full-width">
+                                                        <label>Status</label>
+                                                        <select name="status" value={billForm.status} onChange={handleBillChange}>
+                                                            <option value="Pending">Pending</option>
+                                                            <option value="Paid">Paid</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="modal-footer">
+                                                    <button className="cancel-btn" onClick={() => setShowBillModal(false)}>Cancel</button>
+                                                    <button className="save-btn" onClick={saveBill}>
+                                                        {isBillEditing ? "Update" : "Save"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+
+                        {showAppointmentModal && (<div className="modal-overlay">
+                            <div className="modal-box">
+
+                                <div className="modal-header">
+                                    <h4>{isAppointmentEditing ? "✏️ Edit Appointment" : "➕ Add Appointment"}</h4>
+                                    <button onClick={() => setShowAppointmentModal(false)}>✖</button>
+                                </div>
+
+                                <div className="modal-body">
+
+                                    <div className="form-group">
+                                        <label>ID</label>
+                                        <input
+                                            name="id"
+                                            value={appointmentForm.id}
+                                            onChange={handleAppointmentChange}
+                                            disabled={isAppointmentEditing}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Patient</label>
+                                        <input
+                                            name="patient"
+                                            value={appointmentForm.patient}
+                                            onChange={handleAppointmentChange}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Doctor</label>
+                                        <input
+                                            name="doctor"
+                                            value={appointmentForm.doctor}
+                                            onChange={handleAppointmentChange}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Date</label>
+                                        <input
+                                            type="date"
+                                            name="date"
+                                            value={appointmentForm.date}
+                                            onChange={handleAppointmentChange}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Time</label>
+                                        <input
+                                            type="time"
+                                            name="time"
+                                            value={appointmentForm.time}
+                                            onChange={handleAppointmentChange}
+                                        />
+                                    </div>
+
+                                    <div className="form-group full-width">
+                                        <label>Status</label>
+                                        <select
+                                            name="status"
+                                            value={appointmentForm.status}
+                                            onChange={handleAppointmentChange}
+                                        >
+                                            <option value="Pending">Pending</option>
+                                            <option value="Accepted">Accepted</option>
+                                            <option value="Rejected">Rejected</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button className="cancel-btn" onClick={() => setShowAppointmentModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="save-btn" onClick={saveAppointment}>
+                                        {isAppointmentEditing ? "Update" : "Save"}
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
                         )}
 
                     </div>
