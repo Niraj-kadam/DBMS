@@ -392,8 +392,8 @@ app.delete("/delete-department/:id", (req, res) => {
   });
 });
 
-// ── BILLING PART ──
 
+// ── BILLING PART ──
 // GET ALL BILLS
 app.get("/billing", (req, res) => {
   db.query("SELECT * FROM billing", (err, result) => {
