@@ -554,7 +554,7 @@ function AdminPage() {
                             <a className="nav-link text-white" onClick={() => setActivePage("appointment")}>📅 Appointments</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("department")}>🏢 Departments</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("billing")}>💳 Billing</a>
-                            <a className="nav-link text-white" href="#">📈 Reports</a>
+                            <a className="nav-link text-white" onClick={() => setActivePage("reports")}>📈 Reports</a>
                             <a className="nav-link text-white" href="#">⚙️ Settings</a>
                         </nav>
 
@@ -581,6 +581,7 @@ function AdminPage() {
                                         {activePage === "appointment" && "Manage Appointments"}
                                         {activePage === "department" && "Manage Departments"}
                                         {activePage === "billing" && "Billing & Payments"}
+                                        {activePage === "reports" && "Reports & Analytics"}
                                     </h3>
                                     <small>Welcome back, Admin!</small>
                                 </div>
@@ -679,6 +680,118 @@ function AdminPage() {
                                                     <span className="dash-card__value">{availableBeds}</span>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {/* ── REPORTS PAGE ── */}
+                        {activePage === "reports" && (() => {
+                            // Compute stats
+                            const totalPatients = patients.length;
+                            const activeDoctors = doctors.filter(d => d.status === "Active").length;
+                            const approvedAppointments = appointments.filter(a => a.status === "Accepted" || a.status === "Approved").length;
+                            const collectedRevenue = bills
+                                .filter(b => b.status === "Paid")
+                                .reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+
+                            // Format revenue
+                            const formatRevenue = (amt) => {
+                                if (amt >= 1000) return `₹${(amt / 1000).toFixed(1)}K`;
+                                return `₹${amt}`;
+                            };
+
+                            // Department-wise stats
+                            const deptStats = departments.map(dept => ({
+                                name: dept.name,
+                                totalDoctors: doctors.filter(d => d.dept === dept.name).length,
+                                totalPatients: patients.filter(p => p.disease && doctors.find(d => d.name === p.doctor && d.dept === dept.name)).length,
+                                appointments: appointments.filter(a => doctors.find(d => d.name === a.doctor && d.dept === dept.name)).length,
+                            }));
+
+                            return (
+                                <div className="container-fluid px-4 mt-4">
+                                    {/* Report Cards */}
+                                    <div className="row g-4 mb-4">
+                                        {/* Patient Report */}
+                                        <div className="col-md-6 col-lg-3">
+                                            <div className="report-card">
+                                                <div className="report-card__icon">🧑‍🦽</div>
+                                                <div className="report-card__title">Patient Report</div>
+                                                <div className="report-card__sub">Daily admissions &amp; discharges</div>
+                                                <div className="report-card__value">{totalPatients}</div>
+                                                <span className="report-card__badge report-card__badge--blue">Patients</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Doctor Report */}
+                                        <div className="col-md-6 col-lg-3">
+                                            <div className="report-card">
+                                                <div className="report-card__icon">🧑‍⚕️</div>
+                                                <div className="report-card__title">Doctor Report</div>
+                                                <div className="report-card__sub">Active staff &amp; assignments</div>
+                                                <div className="report-card__value">{activeDoctors}</div>
+                                                <span className="report-card__badge report-card__badge--teal">Active Doctors</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Appointment Report */}
+                                        <div className="col-md-6 col-lg-3">
+                                            <div className="report-card">
+                                                <div className="report-card__icon">📅</div>
+                                                <div className="report-card__title">Appointment Report</div>
+                                                <div className="report-card__sub">Today's &amp; upcoming appointments</div>
+                                                <div className="report-card__value">{approvedAppointments}</div>
+                                                <span className="report-card__badge report-card__badge--green">Approved</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Revenue Report */}
+                                        <div className="col-md-6 col-lg-3">
+                                            <div className="report-card">
+                                                <div className="report-card__icon">💰</div>
+                                                <div className="report-card__title">Revenue Report</div>
+                                                <div className="report-card__sub">Billing &amp; payment overview</div>
+                                                <div className="report-card__value">{formatRevenue(collectedRevenue)}</div>
+                                                <span className="report-card__badge report-card__badge--orange">Collected</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Department-wise Table */}
+                                    <div className="report-table-wrap">
+                                        <div className="report-table-header">
+                                            <span className="report-table-icon">📊</span>
+                                            <h5 className="report-table-title">Department-wise Bed Usage</h5>
+                                        </div>
+                                        <div className="doctor-table">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>DEPARTMENT</th>
+                                                        <th>TOTAL DOCTORS</th>
+                                                        <th>TOTAL PATIENTS</th>
+                                                        <th>APPOINTMENTS</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {deptStats.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="4" className="no-data">No department data found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        deptStats.map((dept, idx) => (
+                                                            <tr key={idx}>
+                                                                <td><strong>{dept.name}</strong></td>
+                                                                <td>{dept.totalDoctors}</td>
+                                                                <td>{dept.totalPatients}</td>
+                                                                <td>{dept.appointments}</td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

@@ -938,3 +938,108 @@
     background: rgba(239, 68, 68, 0.15);
     border-color: rgba(239, 68, 68, 0.4);
 }
+
+/* ── REPORTS PAGE ── Add these to your adminpage.css ── */
+
+/* Report Cards */
+.report-card {
+    background: #1a1f2e;
+    border: 1px solid #2a2f42;
+    border-radius: 14px;
+    padding: 22px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 200px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.report-card__icon {
+    font-size: 2rem;
+    margin-bottom: 6px;
+}
+
+.report-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e0e6f0;
+}
+
+.report-card__sub {
+    font-size: 0.78rem;
+    color: #7a8499;
+    margin-bottom: 8px;
+}
+
+.report-card__value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.report-card__badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    width: fit-content;
+}
+
+.report-card__badge--blue {
+    background: rgba(59, 130, 246, 0.18);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.report-card__badge--teal {
+    background: rgba(20, 184, 166, 0.18);
+    color: #2dd4bf;
+    border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
+.report-card__badge--green {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.report-card__badge--orange {
+    background: rgba(251, 146, 60, 0.18);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+/* Department-wise Report Table */
+.report-table-wrap {
+    background: #1a1f2e;
+    border: 1px solid #2a2f42;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 30px;
+}
+
+.report-table-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.report-table-icon {
+    font-size: 1.3rem;
+}
+
+.report-table-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e0e6f0;
+}
