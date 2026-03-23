@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import AdminPage from './pages/AdminPage';
 import DoctorPage from './pages/DoctorPage';
 import StaffPage from './pages/StaffPage';
+import About from './pages/About';
 
 function App(){
   return(
@@ -24,6 +25,7 @@ function App(){
           <Route path='/adminpage' element={<AdminPage/>}/>
           <Route path='/doctorpage' element={<DoctorPage/>}/>
           <Route path='/staffpage' element={<StaffPage/>}/>
+          <Route path='/about' element={<About/>}/>
         </Routes>
       </BrowserRouter>
     </>
