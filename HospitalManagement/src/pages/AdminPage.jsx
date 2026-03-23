@@ -102,6 +102,44 @@ function AdminPage() {
     const [editingBillId, setEditingBillId] = useState(null);
     const [billForm, setBillForm] = useState(defaultBillingForm);
 
+    // SETTINGS STATES
+    const [settingsForm, setSettingsForm] = useState({
+        hospitalName: "City Hospital",
+        adminEmail: "admin@cityhospital.com",
+        adminPhone: "9876543210",
+        address: "123, Main Road, Mumbai",
+        currency: "INR",
+        timezone: "Asia/Kolkata",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [settingsSaved, setSettingsSaved] = useState(false);
+    const [passwordMsg, setPasswordMsg] = useState("");
+
+    const handleSettingsChange = (e) => {
+        setSettingsForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const saveGeneralSettings = () => {
+        setSettingsSaved(true);
+        setTimeout(() => setSettingsSaved(false), 2500);
+    };
+
+    const changePassword = () => {
+        if (!settingsForm.currentPassword || !settingsForm.newPassword || !settingsForm.confirmPassword) {
+            setPasswordMsg("Please fill all password fields.");
+            return;
+        }
+        if (settingsForm.newPassword !== settingsForm.confirmPassword) {
+            setPasswordMsg("New passwords do not match!");
+            return;
+        }
+        setPasswordMsg("Password changed successfully! ✅");
+        setSettingsForm(prev => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
+        setTimeout(() => setPasswordMsg(""), 3000);
+    };
+
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -555,7 +593,7 @@ function AdminPage() {
                             <a className="nav-link text-white" onClick={() => setActivePage("department")}>🏢 Departments</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("billing")}>💳 Billing</a>
                             <a className="nav-link text-white" onClick={() => setActivePage("reports")}>📈 Reports</a>
-                            <a className="nav-link text-white" href="#">⚙️ Settings</a>
+                            <a className="nav-link text-white" onClick={() => setActivePage("settings")}>⚙️ Settings</a>
                         </nav>
 
                         <div className="p-3">
@@ -582,6 +620,7 @@ function AdminPage() {
                                         {activePage === "department" && "Manage Departments"}
                                         {activePage === "billing" && "Billing & Payments"}
                                         {activePage === "reports" && "Reports & Analytics"}
+                                        {activePage === "settings" && "Settings"}
                                     </h3>
                                     <small>Welcome back, Admin!</small>
                                 </div>
@@ -1554,6 +1593,132 @@ function AdminPage() {
                                 </div>
                             );
                         })()}
+
+                        {/* ── SETTINGS PAGE ── */}
+                        {activePage === "settings" && (
+                            <div className="container-fluid px-4 mt-4">
+
+                                {/* General Info */}
+                                <div className="settings-card">
+                                    <h5 className="settings-section-title">🏥 Hospital Information</h5>
+                                    <div className="settings-form-grid">
+                                        <div className="settings-form-group">
+                                            <label>Hospital Name</label>
+                                            <input
+                                                name="hospitalName"
+                                                value={settingsForm.hospitalName}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Hospital Name"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Admin Email</label>
+                                            <input
+                                                name="adminEmail"
+                                                value={settingsForm.adminEmail}
+                                                onChange={handleSettingsChange}
+                                                placeholder="admin@email.com"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Phone Number</label>
+                                            <input
+                                                name="adminPhone"
+                                                value={settingsForm.adminPhone}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Phone"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Address</label>
+                                            <input
+                                                name="address"
+                                                value={settingsForm.address}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Hospital Address"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Currency</label>
+                                            <select name="currency" value={settingsForm.currency} onChange={handleSettingsChange}>
+                                                <option value="INR">INR (₹)</option>
+                                                <option value="USD">USD ($)</option>
+                                                <option value="EUR">EUR (€)</option>
+                                            </select>
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Timezone</label>
+                                            <select name="timezone" value={settingsForm.timezone} onChange={handleSettingsChange}>
+                                                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                                                <option value="America/New_York">America/New_York (EST)</option>
+                                                <option value="Europe/London">Europe/London (GMT)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button className="settings-save-btn" onClick={saveGeneralSettings}>
+                                        💾 Save Changes
+                                    </button>
+                                    {settingsSaved && <span className="settings-success-msg">✅ Settings saved!</span>}
+                                </div>
+
+                                {/* Change Password */}
+                                <div className="settings-card">
+                                    <h5 className="settings-section-title">🔒 Change Password</h5>
+                                    <div className="settings-form-grid">
+                                        <div className="settings-form-group">
+                                            <label>Current Password</label>
+                                            <input
+                                                type="password"
+                                                name="currentPassword"
+                                                value={settingsForm.currentPassword}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Enter current password"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>New Password</label>
+                                            <input
+                                                type="password"
+                                                name="newPassword"
+                                                value={settingsForm.newPassword}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Enter new password"
+                                            />
+                                        </div>
+                                        <div className="settings-form-group">
+                                            <label>Confirm New Password</label>
+                                            <input
+                                                type="password"
+                                                name="confirmPassword"
+                                                value={settingsForm.confirmPassword}
+                                                onChange={handleSettingsChange}
+                                                placeholder="Confirm new password"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button className="settings-save-btn" onClick={changePassword}>
+                                        🔑 Update Password
+                                    </button>
+                                    {passwordMsg && (
+                                        <span className={passwordMsg.includes("✅") ? "settings-success-msg" : "settings-error-msg"}>
+                                            {passwordMsg}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* About */}
+                                <div className="settings-card">
+                                    <h5 className="settings-section-title">ℹ️ About System</h5>
+                                    <div className="settings-about">
+                                        <p><strong>System:</strong> Hospital Management System</p>
+                                        <p><strong>Version:</strong> 1.0.0</p>
+                                        <p><strong>Developed by:</strong> Admin Team</p>
+                                        <p><strong>Last Updated:</strong> March 2025</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        )}
 
                         {showAppointmentModal && (<div className="modal-overlay">
                             <div className="modal-box">

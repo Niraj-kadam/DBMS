@@ -1043,3 +1043,127 @@
     font-weight: 600;
     color: #e0e6f0;
 }
+
+/* ── SETTINGS PAGE CSS ── */
+/* Replace the existing settings section at the bottom of your adminpage.css with this */
+
+.settings-card {
+    background: #1a1f2e;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border: 1px solid #2a2f42;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.settings-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e6f0;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2a2f42;
+    letter-spacing: 0.3px;
+}
+
+.settings-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.settings-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.settings-form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7a8499;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.settings-form-group input,
+.settings-form-group select {
+    background: #111827;
+    color: #e6edf3;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.settings-form-group input::placeholder {
+    color: #484f58;
+}
+
+.settings-form-group input:focus,
+.settings-form-group select:focus {
+    border-color: #2eaadc;
+}
+
+.settings-form-group select option {
+    background-color: #1a1f2e;
+    color: #e6edf3;
+}
+
+.settings-save-btn {
+    background-color: #38bdf8;
+    color: #0f172a;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.settings-save-btn:hover {
+    background-color: #0ea5e9;
+}
+
+.settings-success-msg {
+    margin-left: 14px;
+    color: #22c55e;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.settings-error-msg {
+    margin-left: 14px;
+    color: #f85149;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.settings-about {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-about p {
+    margin: 0;
+    font-size: 14px;
+    color: #7a8499;
+}
+
+.settings-about p strong {
+    color: #c8d8ec;
+    margin-right: 6px;
+}
+
+@media (max-width: 768px) {
+    .settings-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
