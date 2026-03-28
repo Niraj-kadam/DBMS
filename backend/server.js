@@ -462,6 +462,68 @@ app.put("/update-bill-status/:id", (req, res) => {
   );
 });
 
+// ── STAFF TASKS PART ──
+
+// GET ALL TASKS
+app.get("/staff-tasks", (req, res) => {
+    db.query("SELECT * FROM staff_tasks ORDER BY created_at DESC", (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// ADD TASK
+app.post("/add-staff-task", (req, res) => {
+    const { id, title, description, priority, status, assigned_to } = req.body;
+
+    if (!id || !title) {
+        return res.status(400).json({ error: "ID and Title are required" });
+    }
+
+    const sql = `
+        INSERT INTO staff_tasks (id, title, description, priority, status, assigned_to)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [id, title, description || "", priority || "Medium", status || "Pending", assigned_to || ""], (err) => {
+        if (err) {
+            console.log("Add Task Error:", err);
+            return res.status(500).json(err);
+        }
+        res.json({ success: true, message: "Task added successfully" });
+    });
+});
+
+// UPDATE TASK
+app.put("/update-staff-task/:id", (req, res) => {
+    const id = req.params.id;
+    const { title, description, priority, status, assigned_to } = req.body;
+
+    const sql = `
+        UPDATE staff_tasks 
+        SET title=?, description=?, priority=?, status=?, assigned_to=?
+        WHERE id=?
+    `;
+
+    db.query(sql, [title, description, priority, status, assigned_to, id], (err) => {
+        if (err) {
+            console.log("Update Task Error:", err);
+            return res.status(500).json(err);
+        }
+        res.json({ success: true, message: "Task updated successfully" });
+    });
+});
+
+// DELETE TASK
+app.delete("/delete-staff-task/:id", (req, res) => {
+    db.query("DELETE FROM staff_tasks WHERE id=?", [req.params.id], (err) => {
+        if (err) {
+            console.log("Delete Task Error:", err);
+            return res.status(500).json(err);
+        }
+        res.json({ success: true, message: "Task deleted" });
+    });
+});
 // ── Start Server ──
 app.listen(5000, () => {
   console.log("Server running on port 5000");
