@@ -57,8 +57,7 @@ app.get("/users", (req, res) => {
   });
 });
 
-// Admin
-
+// ── Admin Login ──
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -79,7 +78,6 @@ app.post("/login", (req, res) => {
 
     const user = result[0];
 
-    // Compare password directly (simple version)
     if (password === user.password) {
       res.json({
         success: true,
@@ -89,6 +87,107 @@ app.post("/login", (req, res) => {
     } else {
       res.json({ success: false, message: "Invalid password" });
     }
+  });
+});
+
+// ── Doctor Login ──
+// Matches email against the doctors table directly so doctorInfo is always found
+app.post("/doctor-login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.json({ success: false, message: "All fields required" });
+  }
+
+  // First verify credentials from users table
+  const userQuery = "SELECT * FROM users WHERE email = ?";
+  db.query(userQuery, [email], (err, userResult) => {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.json({ success: false, message: "Database error" });
+    }
+
+    if (userResult.length === 0) {
+      return res.json({ success: false, message: "Email not found" });
+    }
+
+    const user = userResult[0];
+
+    if (password !== user.password) {
+      return res.json({ success: false, message: "Invalid password" });
+    }
+
+    // Now find the matching doctor record by email
+    db.query("SELECT * FROM doctors WHERE email = ?", [email], (err2, doctorResult) => {
+      if (err2) {
+        console.error("❌ Doctor lookup error:", err2);
+        return res.json({ success: false, message: "Doctor lookup failed" });
+      }
+
+      if (doctorResult.length === 0) {
+        return res.json({
+          success: false,
+          message: "No doctor profile found for this email. Contact admin.",
+        });
+      }
+
+      const doctor = doctorResult[0];
+
+      // Return full doctor record so DoctorPage never needs to re-match
+      res.json({
+        success: true,
+        message: "Login successful",
+        doctor: {
+          id: doctor.id,
+          name: doctor.name,
+          email: doctor.email,
+          specialization: doctor.specialization,
+          dept: doctor.dept,
+          phone: doctor.phone,
+          status: doctor.status,
+        },
+      });
+    });
+  });
+});
+
+// ── Doctor Login via Email + Phone (matches doctors table directly) ──
+app.post("/doctor-login-phone", (req, res) => {
+  const { email, phone } = req.body;
+
+  if (!email || !phone) {
+    return res.json({ success: false, message: "Email and phone are required" });
+  }
+
+  const query = "SELECT * FROM doctors WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) AND TRIM(phone) = TRIM(?)";
+  db.query(query, [email, phone], (err, result) => {
+    if (err) {
+      console.error("❌ Doctor login error:", err);
+      return res.json({ success: false, message: "Database error" });
+    }
+
+    if (result.length === 0) {
+      return res.json({
+        success: false,
+        message: "No doctor found with this email and phone. Contact admin.",
+      });
+    }
+
+    const doctor = result[0];
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      doctor: {
+        id: doctor.id,
+        name: doctor.name,
+        email: doctor.email,
+        specialization: doctor.specialization,
+        dept: doctor.dept,
+        phone: doctor.phone,
+        status: doctor.status,
+      },
+    });
   });
 });
 
@@ -106,7 +205,7 @@ app.post("/add-doctor", (req, res) => {
         console.error(err);
         return res.status(400).json({
           success: false,
-          message: err.sqlMessage || "DOctor Entry Failed",
+          message: err.sqlMessage || "Doctor Entry Failed",
         });
       } else {
         res.send({ success: true, message: "Doctor Added Successfully" });
@@ -150,19 +249,16 @@ app.put("/update-doctor/:id", (req, res) => {
 });
 
 /// ------PATIENTS PART-------
-// GET ALL PATIENTS
-// AFTER — format admission date as plain YYYY-MM-DD string
 app.get("/patients", (req, res) => {
   db.query("SELECT *, DATE_FORMAT(admission, '%Y-%m-%d') AS admission FROM patients", (err, result) => {
     if (err) return res.status(500).json(err);
     res.json(result);
   });
 });
-// ADD PATIENT (MANUAL ID)
+
 app.post("/add-patient", (req, res) => {
   const { id, name, age, disease, doctor, admission, status } = req.body;
 
-  // Check if ID is missing before hitting the DB
   if (!id) {
     return res.status(400).json({ error: "ID is required" });
   }
@@ -185,7 +281,6 @@ app.post("/add-patient", (req, res) => {
   );
 });
 
-// UPDATE PATIENT
 app.put("/update-patient/:id", (req, res) => {
   const id = req.params.id;
   const { name, age, disease, doctor, admission, status } = req.body;
@@ -206,7 +301,6 @@ app.put("/update-patient/:id", (req, res) => {
   );
 });
 
-// DELETE PATIENT
 app.delete("/delete-patient/:id", (req, res) => {
   const id = req.params.id;
 
@@ -287,7 +381,6 @@ app.delete("/delete-staff/:id", (req, res) => {
 
 // -------APPOINTMENTS PART-------
 
-// GET ALL APPOINTMENTS
 app.get("/appointments", (req, res) => {
   db.query("SELECT * FROM appointments", (err, result) => {
     if (err) return res.send(err);
@@ -295,7 +388,6 @@ app.get("/appointments", (req, res) => {
   });
 });
 
-// ADD
 app.post("/add-appointment", (req, res) => {
   const { id, patient, doctor, date, time, status } = req.body;
 
@@ -309,7 +401,6 @@ app.post("/add-appointment", (req, res) => {
   );
 });
 
-// UPDATE
 app.put("/update-appointment/:id", (req, res) => {
   const { patient, doctor, date, time, status } = req.body;
 
@@ -323,7 +414,6 @@ app.put("/update-appointment/:id", (req, res) => {
   );
 });
 
-// DELETE
 app.delete("/delete-appointment/:id", (req, res) => {
   db.query(
     "DELETE FROM appointments WHERE id=?",
@@ -335,7 +425,6 @@ app.delete("/delete-appointment/:id", (req, res) => {
   );
 });
 
-// STATUS UPDATE (IMPORTANT)
 app.put("/update-appointment-status/:id", (req, res) => {
   const { status } = req.body;
 
@@ -348,9 +437,9 @@ app.put("/update-appointment-status/:id", (req, res) => {
     }
   );
 });
+
 // ── DEPARTMENTS PART ──
 
-// GET ALL DEPARTMENTS
 app.get("/departments", (req, res) => {
   db.query("SELECT * FROM departments", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -358,7 +447,6 @@ app.get("/departments", (req, res) => {
   });
 });
 
-// ADD DEPARTMENT
 app.post("/add-department", (req, res) => {
   const { id, name, head, beds, occupied } = req.body;
 
@@ -384,7 +472,6 @@ app.post("/add-department", (req, res) => {
   );
 });
 
-// DELETE DEPARTMENT
 app.delete("/delete-department/:id", (req, res) => {
   db.query("DELETE FROM departments WHERE id = ?", [Number(req.params.id)], (err) => {
     if (err) return res.status(500).json(err);
@@ -394,7 +481,7 @@ app.delete("/delete-department/:id", (req, res) => {
 
 
 // ── BILLING PART ──
-// GET ALL BILLS
+
 app.get("/billing", (req, res) => {
   db.query("SELECT * FROM billing", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -402,7 +489,6 @@ app.get("/billing", (req, res) => {
   });
 });
 
-// ADD BILL
 app.post("/add-bill", (req, res) => {
   const { id, patient, treatment, amount, status } = req.body;
 
@@ -424,7 +510,6 @@ app.post("/add-bill", (req, res) => {
   });
 });
 
-// UPDATE BILL
 app.put("/update-bill/:id", (req, res) => {
   const { patient, treatment, amount, status } = req.body;
 
@@ -440,7 +525,6 @@ app.put("/update-bill/:id", (req, res) => {
   });
 });
 
-// DELETE BILL
 app.delete("/delete-bill/:id", (req, res) => {
   db.query("DELETE FROM billing WHERE id=?", [req.params.id], (err) => {
     if (err) return res.status(500).json(err);
@@ -448,7 +532,6 @@ app.delete("/delete-bill/:id", (req, res) => {
   });
 });
 
-// UPDATE BILL STATUS ONLY
 app.put("/update-bill-status/:id", (req, res) => {
   const { status } = req.body;
 
@@ -464,7 +547,6 @@ app.put("/update-bill-status/:id", (req, res) => {
 
 // ── STAFF TASKS PART ──
 
-// GET ALL TASKS
 app.get("/staff-tasks", (req, res) => {
     db.query("SELECT * FROM staff_tasks ORDER BY created_at DESC", (err, result) => {
         if (err) return res.status(500).json(err);
@@ -472,7 +554,6 @@ app.get("/staff-tasks", (req, res) => {
     });
 });
 
-// ADD TASK
 app.post("/add-staff-task", (req, res) => {
     const { id, title, description, priority, status, assigned_to } = req.body;
 
@@ -494,7 +575,6 @@ app.post("/add-staff-task", (req, res) => {
     });
 });
 
-// UPDATE TASK
 app.put("/update-staff-task/:id", (req, res) => {
     const id = req.params.id;
     const { title, description, priority, status, assigned_to } = req.body;
@@ -514,7 +594,6 @@ app.put("/update-staff-task/:id", (req, res) => {
     });
 });
 
-// DELETE TASK
 app.delete("/delete-staff-task/:id", (req, res) => {
     db.query("DELETE FROM staff_tasks WHERE id=?", [req.params.id], (err) => {
         if (err) {
@@ -524,6 +603,7 @@ app.delete("/delete-staff-task/:id", (req, res) => {
         res.json({ success: true, message: "Task deleted" });
     });
 });
+
 // ── Start Server ──
 app.listen(5000, () => {
   console.log("Server running on port 5000");
